@@ -15,3 +15,5 @@ vision:
  run network and build solid network
 
  catch output sygnal and adjust for high performance
+
+please give me opinions if you prefer
