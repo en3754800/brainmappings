@@ -16,4 +16,4 @@ vision:
 
  catch output sygnal and adjust for high performance
 
-please give me opinions if you prefer
+please give me an opinion if you prefer
