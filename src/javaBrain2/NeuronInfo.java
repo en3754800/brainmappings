@@ -521,7 +521,7 @@ public class NeuronInfo {
 	}
 	private void updateborder() {
 		if(ValChanged.Border.compare(changed)==true) {
-			ExneuUnit.writeborder(neuNo, xml.border);
+			SingleNeuron.writeborder(neuNo, xml.border);
 		}
 	}
 	private class Info{
