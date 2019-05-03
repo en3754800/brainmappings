@@ -261,13 +261,13 @@ public class SwitchEdit {
 					for(EnumSet<NBord> inear: iNBlist.get(i)) {
 						for(int j=0;j<inear.size();j++) {
 
-								}
-							}
 						}
 					}
 				}
+			}
+		}
 
-					}
+	}
 	public enum NBord {
 		OfX,
 		OfY,
