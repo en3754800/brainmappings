@@ -1,14 +1,14 @@
 package javaBrain2;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 
 public class SwitchEdit {
@@ -48,6 +48,7 @@ public class SwitchEdit {
 	 * amount ga 0.05 ika nara switch wo sakujo suru->
 	 * switch ga 10 ika mataha entcount ga upcount ijou nara random ni hitotu tikaku(nearbycount) nowo switch tosite tuika suru amount ha 0.5*random
 	 * switch 10 ika to entcount de kiriwake?
+	 * upcount to erasebord no not default wo kiroku suru basho wo kangaeteoku
 	 * @param No
 	 * @param passtime
 	 */
@@ -68,7 +69,7 @@ public class SwitchEdit {
 		}catch(IOException e) {
 			e.printStackTrace();
 		}
-		int flushtime=Integer.parseInt(timeinfo.split(";")[2]);
+		int flushtime=Integer.parseInt(timeinfo.split(";")[3]);
 		String samstr="default";
 		String samstr2="tilt:3;nearbybord:20";
 		ArrayList<Integer> swaddNo=new ArrayList<Integer>();
@@ -161,7 +162,7 @@ public class SwitchEdit {
 			e.printStackTrace();
 		}
 	}
-	public void nearbymake(String outputgroup) {
+	public void nearbymake(String outputgroup) {//tairyou data wo atukau node speed keisoku hissu
 		String[] readlist=CommonVal.outputp.readgroupbydivide(outputgroup);
 		OutputPlace.AnalizeList[] analist=new OutputPlace.AnalizeList[readlist.length];
 		OutputPlace.GroupInfo ginfo=CommonVal.outputp.getGinfo(outputgroup);
@@ -226,54 +227,130 @@ public class SwitchEdit {
 		for(int i=0;i<iginfo.entdivide;i++) {
 			ianalist[i]=InputPlace.analizelist(ireadlist[i]);
 		}
-		ArrayList<ArrayList<EnumSet<NBord>>> iNBlist=new ArrayList<ArrayList<EnumSet<NBord>>>(ginfo.entdivide);
+		ArrayList<EnumMap<NBord,ArrayList<Integer>>> iNBlist=new ArrayList<EnumMap<NBord,ArrayList<Integer>>>(ginfo.entdivide);
 		for(int i=0;i<iginfo.entdivide;i++) {
-			iNBlist.set(i, new ArrayList<EnumSet<NBord>>());
+			iNBlist.set(i, new EnumMap<NBord,ArrayList<Integer>>(NBord.class));
 			for(int j=0;j<ianalist[i].No.size();j++) {
-				iNBlist.get(i).set(j,EnumSet.noneOf(NBord.class));
+				for(NBord value:NBord.values()) {
+					iNBlist.get(i).put(value,new ArrayList<Integer>());
+				}
 				if(Math.abs( ianalist[i].x.get(j)-iginfo.divide.get(i).ofsetx)<=5) {
-					iNBlist.get(i).get(j).add(NBord.OfX);
+					iNBlist.get(i).get(NBord.OfX).add(j);
 				}if(Math.abs( ianalist[i].y.get(j)-iginfo.divide.get(i).ofsety)<=5) {
-					iNBlist.get(i).get(j).add(NBord.OfY);
+					iNBlist.get(i).get(NBord.OfY).add(j);
 				}if(Math.abs( ianalist[i].z.get(j)-iginfo.divide.get(i).ofsetz)<=5) {
-					iNBlist.get(i).get(j).add(NBord.OfZ);
+					iNBlist.get(i).get(NBord.OfZ).add(j);
 				}if(Math.abs( ianalist[i].x.get(j)-iginfo.divide.get(i).ofsetx-iginfo.divide.get(i).sizex)<=5) {
-					iNBlist.get(i).get(j).add(NBord.X);
+					iNBlist.get(i).get(NBord.X).add(j);
 				}if(Math.abs( ianalist[i].y.get(j)-iginfo.divide.get(i).ofsety-iginfo.divide.get(i).sizey)<=5) {
-					iNBlist.get(i).get(j).add(NBord.Y);
+					iNBlist.get(i).get(NBord.Y).add(j);
 				}if(Math.abs( ianalist[i].z.get(j)-iginfo.divide.get(i).ofsetz-iginfo.divide.get(i).sizez)<=5) {
-					iNBlist.get(i).get(j).add(NBord.X);
+					iNBlist.get(i).get(NBord.X).add(j);
 				}
 			}
 		}
-		HashMap<Integer,ArrayList<String>> nbmap=new HashMap<Integer,ArrayList<String>>();
+		ArrayList<String> nbmap=new ArrayList<String>();
 		for(int i=0;i<iginfo.entdivide;i++) {
 			for(int k=0;k<analist[i].No.size();k++) {
-				nbmap.put(analist[i].No.get(k),new ArrayList<String>());
 				for(int j=0;j<ianalist[i].No.size();j++) {
 					double pow=Math.pow(ianalist[i].x.get(j)-analist[i].x.get(k),2)+
 							Math.pow(ianalist[i].y.get(j)-analist[i].y.get(k),2)+Math.pow(ianalist[i].z.get(j)-analist[i].z.get(k), 2);
 					if(pow<=25) {
-						nbmap.get(analist[i].No.get(k)).add(analist[i].No.get(k)+"/"+(int)(Math.sqrt(pow)));
+						nbmap.add(analist[i].No.get(k)+"/"+(int)(Math.sqrt(pow)));
 					}
 				}
-				if(Math.abs(analist[i].x.get(k)-ginfo.divide.get(i).ofsetx)<=5) {
-					for(EnumSet<NBord> inear: iNBlist.get(i)) {
-						for(int j=0;j<inear.size();j++) {
+				for(NBord value:NBord.values()) {
 
+					if(value.retAxdist(ginfo.divide.get(i), analist[i], k)<=5) {
+						for(int neard: nearmap.get(i).get(value)) {
+							for(int inearu: iNBlist.get(neard).get(value)) {
+								if(neard==i) {
+									continue;
+								}
+								double pow=Math.pow(analist[i].x.get(k)-ianalist[neard].x.get(inearu),2 )+
+										Math.pow(analist[i].y.get(k)-ianalist[neard].y.get(inearu),2 )+
+										Math.pow(analist[i].z.get(k)-ianalist[neard].z.get(inearu),2 );
+								if(pow<=25) {
+									String str=ianalist[neard].No.get(inearu)+"/"+(int)(Math.sqrt(pow));
+									if(nbmap.contains(str)) {
+										continue;
+									}
+									nbmap.add(str);
+								}
+							}
 						}
 					}
 				}
+				try {
+					StringBuffer sb=new StringBuffer();
+					BufferedWriter bw=new BufferedWriter(new FileWriter(new File("nearbycount"+analist[i].No.get(k)+".txt")));
+					NeuronInfo ni=new NeuronInfo(analist[i].No.get(k));
+					String[] flushtime=ni.pickElem("flushtime",1);//entcborder
+
+					bw.write(outputgroup+";0;"+flushtime[0]+";"+flushtime[0]+"\n");
+					for(int j=0;j<nbmap.size();j++) {
+						sb.append(nbmap.get(j)).append(";");
+					}
+					sb.deleteCharAt(sb.length()-1);
+					bw.write(sb.toString());
+					sb.replace(0, sb.length(), "");
+					for(int j=0;j<nbmap.size();j++) {
+						sb.append("\n");
+						sb.append( nbmap.get(j).replace("/", ";"));
+						sb.append(';');
+						NearbyCount.State.getValue(nbmap.get(j).split("/")[1])
+						.settime().forEach(time->sb.append(time.toString().substring(1,4)).append(">0;"));
+						sb.deleteCharAt(sb.length()-1);
+					}
+					bw.write(sb.toString());
+					bw.close();
+				} catch (IOException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
+				}
+				NearbyCount.State.D5.settime().forEach( time->{time.toString().substring(1, 4);});
+				nbmap.clear();
 			}
 		}
 
 	}
-	public enum NBord {
-		OfX,
-		OfY,
-		OfZ,
-		X,
-		Y,
-		Z;
+	public enum NBord {//state pattern mo sankouni siyou
+		OfX{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor) {
+				return Math.abs(ana.x.get(getor)-div.ofsetx);
+			}
+		},
+		OfY{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor){
+				return Math.abs(ana.y.get(getor)-div.ofsety);
+			}
+		},
+		OfZ{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor){
+				return Math.abs(ana.z.get(getor)-div.ofsetz);
+			}
+		},
+		X{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor){
+				return Math.abs(ana.x.get(getor)-div.ofsetx-div.sizex);
+			}
+		},
+		Y{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor) {
+				return Math.abs(ana.y.get(getor)-div.ofsety-div.sizey);
+			}
+		},
+		Z{
+			@Override
+			public double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor) {
+				return Math.abs(ana.z.get(getor)-div.ofsetz-div.sizez);
+			}
+		};
+		public abstract double retAxdist(OutputPlace.DivideInfo div,OutputPlace.AnalizeList ana,int getor);
 	}
 }
