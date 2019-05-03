@@ -335,7 +335,7 @@ public class NearbyCount {
 			sb.append(inno3[0]).append(';').append(inno3[1]).append(';');
 			count.get(inno3[0]).forEach(enums->{
 				sb.append(enums.time.toString().substring(1,4));
-				sb.append(">").append(enums.time).append(';');//enums.time no tokoro ga file to count no goukei ni naruyou shuusei hituyou
+				sb.append(">").append(enums.time).append(';');
 			});
 			sb.deleteCharAt(sb.length()-1);
 			bw.write(sb.toString());
