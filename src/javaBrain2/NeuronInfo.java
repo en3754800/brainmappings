@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.jar.Attributes;
 
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;

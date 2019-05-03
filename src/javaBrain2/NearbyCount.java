@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -38,7 +39,7 @@ public class NearbyCount {
  * 0 kara jungurini nyuuryoku site
  * @param args
  */
-	public enum Time{
+	private enum Time{
 		T0(0),
 		T100(1),
 		T200(2),
@@ -324,7 +325,7 @@ public class NearbyCount {
 		bw.newLine();
 		compare();//limit ga 0 nara neuron wo (updown) henkou suru method
 		for(int[] innol:innodelay) {
-			sb.append(innol[0]).append('/').append(innol[1]).append(';');
+			sb.append(innol[0]).append('>').append(innol[1]).append(';');
 		}
 		sb.deleteCharAt(sb.lastIndexOf(";"));
 		bw.write(sb.toString());
@@ -341,6 +342,7 @@ public class NearbyCount {
 			bw.newLine();
 		}
 		bw.close();
+		String spa=FileSystems.getDefault().getSeparator();
 		Files.copy(Paths.get(CommonFunc.getPath("nearbycount",No,".tmp.txt")),
 				Paths.get(CommonFunc.getPath("nearbycount",No,".txt")), StandardCopyOption.REPLACE_EXISTING);
 		Files.deleteIfExists(Paths.get(CommonFunc.getPath("nearbycount",No,".tmp.txt")));

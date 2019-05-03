@@ -36,7 +36,7 @@ public class DelayAmount {
 	public DelayAmount(int No) {
 		String delaystr="";
 		try {
-			BufferedReader br=new BufferedReader(new FileReader(CommonFunc.getPath("desttimeamo", No, ".txt")));
+			BufferedReader br=new BufferedReader(new FileReader(file));
 			String str =br.readLine();
 			while(str!=null) {
 				delaystr=delaystr+str;
