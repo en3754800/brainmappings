@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.jar.Attributes;
 
 import javax.xml.bind.DataBindingException;
 import javax.xml.bind.JAXB;
@@ -14,6 +15,12 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 public class NeuronInfo {
 /**
@@ -60,12 +67,12 @@ public class NeuronInfo {
 	}
 	private enum ValChanged{
 		Border(1),
-		EntcBorder(2),
+		Uflushtime(2),
 		InputG(3),
 		InputIti(4),
 		OutputG(5),
 		OutputIti(6),
-		SwiCBorder(7),
+		Flushtime(7),
 		Repressor(8),
 		ToNo(9),
 		ToDelay(10),
@@ -524,6 +531,24 @@ public class NeuronInfo {
 			SingleNeuron.writeborder(neuNo, xml.border);
 		}
 	}
+	public String[] pickElem(String elemname,int retlength) {
+		File saxf=new File(CommonFunc.getPath( "neuroninfo",neuNo,".xml"));
+		SAXParserFactory factory=SAXParserFactory.newInstance();
+		String[] ret=new String[retlength];
+		try {
+			SAXParser parser=factory.newSAXParser();
+			NISAXhandler handler=new NISAXhandler();
+			parser.parse(saxf,handler);
+			ret=(String[])handler.tarvalue.toArray();
+		} catch (ParserConfigurationException | SAXException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+		return ret;
+	}
 	private class Info{
 		public double border;
 		public int entirecountborder;
@@ -687,6 +712,33 @@ public class NeuronInfo {
 		public void setZ(double z) {
 			this.z=z;
 		}
+	}
+	public class NISAXhandler extends DefaultHandler{//oya youso to hukusuu no youso niha tukaenai
+		public String tarattri;
+		public String tarattrival;
+		public String tarname;
+		public ArrayList<String> tarvalue;
+		protected String tmpval;
+		protected boolean istarget;
+		public void startDocument() {
+			istarget=false;
+		}
+		public void endDocument() {
+		}
+		public void startElement(String uri,String localName,String qName,Attributes attributes) {
+			if(qName==tarname) {
+				istarget=true;
+			}
+		}
+		public void endElement(String uri,String localName,String qName) {
+			if(qName==tarname) {
+				istarget=false;
+			}
+		}
+		public void characters(char[] ch,int start,int length) {
+			tarvalue.add( new String(ch,start,length));
+		}
+
 	}
     static void quick_sort(Object[] key,int[] d, int left, int right) {
         if (left>=right) {
