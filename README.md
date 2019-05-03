@@ -15,8 +15,5 @@ vision:
  run network and build solid network
 
  catch output sygnal and adjust for high performance
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/master
+ 
 please give me an opinion if you prefer
