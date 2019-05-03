@@ -8,3 +8,4 @@ vision:
  prepare input information -> prepare to unit 10 to unit 500 input sygnal of 0.3
  run network and build solid network
  catch output sygnal and adjust for high performance
+please give me an opinion if you prefer
